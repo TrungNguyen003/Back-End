@@ -1,0 +1,83 @@
+# Tạo tệp swagger.yaml và dán nội dung dưới đây
+swagger: '2.0'
+info:
+  description: API documentation for Category Management
+  version: "1.0.0"
+  title: Category API
+host: localhost:8081
+basePath: /admin/categories
+schemes:
+  - http
+paths:
+  /:
+    get:
+      tags:
+        - Categories
+      summary: Get all categories
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Category'
+  /add-category:
+    post:
+      tags:
+        - Categories
+      summary: Add a new category
+      parameters:
+        - in: body
+          name: category
+          description: Category object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Category'
+      responses:
+        201:
+          description: Category added
+  /edit-category/{id}:
+    put:
+      tags:
+        - Categories
+      summary: Update an existing category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - in: body
+          name: category
+          description: Category object that needs to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/Category'
+      responses:
+        200:
+          description: Category updated
+  /delete-category/{id}:
+    delete:
+      tags:
+        - Categories
+      summary: Delete a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Category deleted
+definitions:
+  Category:
+    type: object
+    required:
+      - Category_ID
+      - Name
+    properties:
+      Category_ID:
+        type: integer
+      Name:
+        type: string
+      Description:
+        type: string
