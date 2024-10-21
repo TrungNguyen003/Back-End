@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcryptjs");
+const bcryptjs = require("bcryptjs");
 const passport = require("passport");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
@@ -131,8 +131,8 @@ router.post(
         emailVerificationExpires: Date.now() + 3600000,
       });
 
-      const salt = await bcrypt.genSalt(10);
-      newUser.password = await bcrypt.hash(newUser.password, salt);
+      const salt = await bcryptjs.genSalt(10);
+      newUser.password = await bcryptjs.hash(newUser.password, salt);
 
       await newUser.save();
 
@@ -365,14 +365,14 @@ router.post("/change-password", authenticateJWT, async (req, res) => {
     }
 
     // Kiểm tra mật khẩu cũ
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    const isMatch = await bcryptjs.compare(oldPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ msg: "Mật khẩu hiện tại không chính xác" });
     }
 
     // Hash mật khẩu mới và cập nhật
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(newPassword, salt);
 
     user.password = hashedPassword;
     await user.save();

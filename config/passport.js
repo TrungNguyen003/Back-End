@@ -1,6 +1,6 @@
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user');
-const bcrypt = require('bcryptjs');
+const bcryptjs = require('bcryptjs');
 
 module.exports = function(passport) {
     // Sử dụng `gmail` thay vì `username`
@@ -12,7 +12,7 @@ module.exports = function(passport) {
             }
 
             // So sánh mật khẩu
-            bcrypt.compare(password, user.password, (err, isMatch) => {
+            bcryptjs.compare(password, user.password, (err, isMatch) => {
                 if (err) throw err;
                 if (isMatch) {
                     return done(null, user);
