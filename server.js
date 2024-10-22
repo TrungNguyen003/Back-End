@@ -186,6 +186,6 @@ app.get("/api/districts/:districtId/wards", async (req, res) => {
 });
 
 // Start the server
-app.listen(8081, () => {
-  console.log("Server is running on port 8081");
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
 });
