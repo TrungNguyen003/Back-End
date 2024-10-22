@@ -1,3 +1,3 @@
 module.exports = {
-  database: "mmongodb+srv://trungzami:zami003@cluster0.gmjehle.mongodb.net/shoppets",
+  database: "mongodb+srv://trungzami:zami003@cluster0.gmjehle.mongodb.net/shoppets",
 };

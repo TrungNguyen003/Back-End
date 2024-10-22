@@ -11,6 +11,8 @@ const cookieParser = require("cookie-parser");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const axios = require("axios");
+const MongoStore = require("connect-mongo");
+
 // Connect to MongoDB
 mongoose.connect(config.database, {
   useNewUrlParser: true,
@@ -40,13 +42,18 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Session configuration
+// Session configuration using MongoDB
 app.use(
   session({
     secret: "yourSecretKey",
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false },
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: config.database, // URL kết nối tới MongoDB
+      collectionName: "sessions", // Tên collection lưu trữ session
+      ttl: 14 * 24 * 60 * 60, // Thời gian sống của session: 14 ngày
+    }),
+    cookie: { secure: false }, // Đặt thành `true` nếu bạn đang sử dụng HTTPS
   })
 );
 
@@ -187,5 +194,5 @@ app.get("/api/districts/:districtId/wards", async (req, res) => {
 
 // Start the server
 app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+  console.log("Server is running on port 8081");
 });
