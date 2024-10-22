@@ -18,6 +18,7 @@ mongoose.connect(config.database, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   ssl: true,
+  tlsInsecure: true
 });
 mongoose.connection.on(
   "error",
