@@ -17,6 +17,7 @@ const MongoStore = require("connect-mongo");
 mongoose.connect(config.database, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  ssl: true,
 });
 mongoose.connection.on(
   "error",
