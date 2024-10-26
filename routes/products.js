@@ -191,22 +191,62 @@ router.get("/products/search", async (req, res) => {
   }
 });
 
+router.get("/products/searchh", async (req, res) => {
+  const { query, page = 1, limit = 10 } = req.query;
+
+  try {
+    // Đếm tổng số sản phẩm theo tên sản phẩm
+    const totalProducts = await Product.countDocuments({
+      name: new RegExp(query, "i"), // Tìm kiếm không phân biệt hoa thường với từ khóa
+    });
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    // Tìm sản phẩm theo tên và phân trang
+    const products = await Product.find({
+      name: new RegExp(query, "i"), // Sử dụng biểu thức chính quy để tìm kiếm
+    })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .populate("category_id");
+
+    // Chuyển đổi dữ liệu sản phẩm để xử lý giá Decimal128
+    const transformedProducts = products.map((product) => {
+      const productObj = product.toObject();
+      if (productObj.price && productObj.price.$numberDecimal) {
+        // Chuyển đổi giá thành số thực và định dạng VND
+        productObj.price = parseFloat(
+          productObj.price.$numberDecimal
+        ).toLocaleString("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        });
+      }
+      return productObj;
+    });
+
+    res.json({ products: transformedProducts, totalPages });
+  } catch (err) {
+    console.error("Error searching for products:", err); // Ghi lại lỗi nếu có
+    res.status(500).json({ error: "Error searching for products" }); // Phản hồi lỗi server
+  }
+});
+
 // Suggestions for category names
 // Gợi ý các danh mục theo tên tìm kiếm
 router.get("/categories/suggestions", async (req, res) => {
   const { query } = req.query;
 
   try {
-    // Tìm các danh mục tên chứa chuỗi tìm kiếm, giới hạn số lượng kết quả
-    const suggestions = await Category.find(
-      { Name: new RegExp(query, "i") },
-      { Name: 1 } // Chỉ lấy trường 'Name'
+    // Tìm các sản phẩm có tên chứa chuỗi tìm kiếm, giới hạn số lượng kết quả
+    const suggestions = await Product.find(
+      { name: new RegExp(query, "i") }, // Tìm kiếm không phân biệt hoa thường
+      { name: 1 } // Chỉ lấy trường 'Name'
     ).limit(10);
 
-    res.json(suggestions); // Trả về gợi ý danh mục
+    res.json(suggestions); // Trả về gợi ý sản phẩm
   } catch (err) {
-    console.error("Error getting category suggestions:", err); // Ghi lại lỗi nếu có
-    res.status(500).json({ error: "Error getting category suggestions" }); // Phản hồi lỗi server
+    console.error("Error getting product suggestions:", err); // Ghi lại lỗi nếu có
+    res.status(500).json({ error: "Error getting product suggestions" }); // Phản hồi lỗi server
   }
 });
 

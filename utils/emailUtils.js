@@ -11,9 +11,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Hàm gửi email xác nhận
+// Hàm gửi email xác nhận và trả về verifyUrl
 const sendVerificationEmail = async (to, userId, token) => {
-  const verifyUrl = `http://localhost:8081/users/verify-email?token=${token}&userId=${userId}`;
+  const verifyUrl = `http://localhost:10000/users/verify-email?token=${token}&userId=${userId}`;
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -25,7 +25,8 @@ const sendVerificationEmail = async (to, userId, token) => {
   try {
     await transporter.sendMail(mailOptions);
     console.log("Email xác nhận đã được gửi");
-    return token;
+    // Trả về verifyUrl cho frontend
+    return verifyUrl;
   } catch (error) {
     console.error("Lỗi khi gửi email:", error);
     throw new Error("Không thể gửi email xác nhận");

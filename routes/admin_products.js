@@ -94,10 +94,6 @@ router.post(
         });
       }
 
-      // Chuyển đổi giá sang VND
-      const exchangeRate = 24000; // Tỷ giá USD/VND
-      const priceInVND = (parseFloat(price) * exchangeRate).toFixed(3);
-
       // Xử lý prices_by_weight (giải mã chuỗi JSON nếu có)
       let processedPricesByWeight = [];
       if (prices_by_weight) {
@@ -106,7 +102,7 @@ router.post(
           processedPricesByWeight = parsedPricesByWeight.map((item) => ({
             weight: parseFloat(item.weight),
             price: mongoose.Types.Decimal128.fromString(
-              (parseFloat(item.price) * exchangeRate).toFixed(3)
+              parseFloat(item.price).toFixed(3)
             ),
           }));
         } catch (error) {
@@ -121,7 +117,7 @@ router.post(
         category_id,
         name,
         description,
-        price: mongoose.Types.Decimal128.fromString(priceInVND),
+        price: mongoose.Types.Decimal128.fromString(parseFloat(price).toFixed(3)), // Lưu trực tiếp giá VND
         stock,
         prices_by_weight: processedPricesByWeight, // Thêm mảng giá theo cân nặng
         image: imageFile,
@@ -148,6 +144,7 @@ router.post(
     }
   }
 );
+
 
 router.get("/edit-product/:id", async (req, res) => {
   try {

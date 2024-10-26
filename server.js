@@ -18,7 +18,7 @@ mongoose.connect(config.database, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   ssl: true,
-  tlsInsecure: true
+  tlsInsecure: true,
 });
 mongoose.connection.on(
   "error",
@@ -124,6 +124,7 @@ const managerOrders = require("./routes/manage_orders");
 const ManagerDashboard = require("./routes/manager_dashboard");
 const staffDashhboard = require("./routes/staff_dashboard");
 const staffOrders = require("./routes/staff_orders");
+
 app.get("/set-cookie", (req, res) => {
   res.cookie("example", "value", {
     httpOnly: true,
@@ -152,7 +153,7 @@ app.use("/ship", ship);
 app.use("/spa", bookingRoutes);
 app.use("/", managerOrders);
 app.use("/", ManagerDashboard);
-app.use("/", staffOrders)
+app.use("/", staffOrders);
 app.use("/", staffDashhboard);
 app.get("/", (req, res) => {
   res.send("Welcome to the homepage");

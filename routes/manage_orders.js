@@ -72,18 +72,35 @@ router.put(
   isManager,
   async (req, res) => {
     try {
-      const { status } = req.body;
+      const { status, refundReason } = req.body;
       const orderId = req.params.orderId;
 
-      const order = await Order.findByIdAndUpdate(
-        orderId,
-        { status },
-        { new: true }
-      );
+      const updateData = { status };
+
+      // Nếu có lý do từ chối, lưu lại lý do từ chối
+      if (status === "từ chối đơn hàng" && refundReason) {
+        updateData.refundReason = refundReason;
+      }
+
+      // Tìm đơn hàng và cập nhật
+      const order = await Order.findByIdAndUpdate(orderId, updateData, {
+        new: true,
+      });
 
       if (!order) {
         return res.status(404).json({ msg: "Order not found" });
       }
+
+      // Thêm một bản ghi tương tác mới vào interactions
+      const interaction = {
+        staff: req.user._id, // Lưu ID của nhân viên đang thực hiện
+        action: `Cập nhật trạng thái thành "${status}"`, // Loại hành động
+        timestamp: new Date(), // Thời gian hành động
+      };
+
+      // Cập nhật interactions cho đơn hàng
+      order.interactions.push(interaction);
+      await order.save();
 
       res.status(200).json(order);
     } catch (error) {

@@ -152,7 +152,7 @@ router.get("/my-bookings", isAuthenticated, async (req, res) => {
 });
 
 // Route lấy danh sách tất cả các đơn đặt lịch cho admin
-router.get("/admin/bookings", isAuthenticated, isAdmin, async (req, res) => {
+router.get("/admin/bookings", isAuthenticated, async (req, res) => {
   try {
     const bookings = await PetSpaBooking.find().populate(
       "owner",
@@ -170,7 +170,6 @@ router.get("/admin/bookings", isAuthenticated, isAdmin, async (req, res) => {
 router.put(
   "/admin/bookings/:id",
   isAuthenticated,
-  isAdmin,
   async (req, res) => {
     try {
       const { status } = req.body;
@@ -200,7 +199,6 @@ router.put(
 router.delete(
   "/admin/bookings/:id",
   isAuthenticated,
-  isAdmin,
   async (req, res) => {
     try {
       const booking = await PetSpaBooking.findByIdAndDelete(req.params.id);

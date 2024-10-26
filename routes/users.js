@@ -90,7 +90,7 @@ router.post(
   [
     check("username", "Tên đăng nhập là bắt buộc").notEmpty(),
     check("gmail", "Gmail là bắt buộc").isEmail(),
-    check("password", "Mật khẩu phải có ít nhất 8 ký tự").isLength({ min: 8 }),
+    check("password", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm 1 chữ hoa và 1 ký tự đặc biệt").matches(/^(?=.*[A-Z])(?=.*\W)[A-Za-z\d\W]{8,}$/),
     check("password2", "Xác nhận mật khẩu là bắt buộc").notEmpty(),
     check("role", "Vai trò là bắt buộc").notEmpty(),
   ],
@@ -116,7 +116,7 @@ router.post(
       }
 
       const userId = await generateUniqueUserId();
-      const avatarPath = "/images/default-avatar.png";
+      const avatarPath = "/images/000.jpg";
 
       const token = crypto.randomBytes(20).toString("hex");
 
@@ -146,33 +146,20 @@ router.post(
   }
 );
 
+router.post("/send-verification-email", async (req, res) => {
+  const { email, userId } = req.body;
 
-router.get('/verify-email', async (req, res) => {
-  const { token, userId } = req.query;
+  // Tạo token ngẫu nhiên
+  const token = crypto.randomBytes(32).toString("hex");
 
   try {
-    const user = await User.findOne({
-      user_id: userId,
-      emailVerificationToken: token,
-      emailVerificationExpires: { $gt: Date.now() } // Kiểm tra thời gian hết hạn
-    });
-
-    if (!user) {
-      return res.status(400).json({ msg: 'Mã xác nhận không hợp lệ hoặc đã hết hạn.' });
-    }
-
-    user.emailVerificationToken = undefined;
-    user.emailVerificationExpires = undefined;
-    user.isVerified = true;
-
-    await user.save();
-
-    res.status(200).json({ msg: 'Email đã được xác nhận thành công!' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: 'Lỗi máy chủ' });
+    const verifyUrl = await sendVerificationEmail(email, userId, token);
+    res.status(200).json({ success: true, verifyUrl });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
+
 
 
 
@@ -358,6 +345,14 @@ router.post("/change-password", authenticateJWT, async (req, res) => {
       .json({ msg: "Mật khẩu mới và xác nhận mật khẩu không khớp" });
   }
 
+  // Kiểm tra độ mạnh của mật khẩu
+  const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
+  if (!passwordRegex.test(newPassword)) {
+    return res.status(400).json({
+      msg: "Mật khẩu phải có ít nhất 8 ký tự, bao gồm 1 chữ hoa và 1 ký tự đặc biệt",
+    });
+  }
+
   try {
     const user = await User.findById(req.user.id);
     if (!user) {
@@ -384,28 +379,6 @@ router.post("/change-password", authenticateJWT, async (req, res) => {
   }
 });
 
-router.post("/update-phone", authenticateJWT, async (req, res) => {
-  try {
-    const { phone } = req.body;
-
-    if (!phone) {
-      return res.status(400).json({ msg: "Phone number is required" });
-    }
-
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
-
-    user.phone = phone;
-    await user.save();
-
-    res.status(200).json({ phone: user.phone });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Server error" });
-  }
-});
 
 
 module.exports = router;
