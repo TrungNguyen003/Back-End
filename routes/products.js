@@ -8,20 +8,41 @@ const mongoose = require("mongoose");
 
 router.get("/products/all", async (req, res) => {
   try {
-    const products = await Product.find({}).populate("category_id"); // Lấy tất cả sản phẩm và nạp thông tin danh mục
+    // Lấy tham số `page` và `limit` từ query, mặc định là trang 1 và 10 sản phẩm mỗi trang nếu không được truyền vào
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
-    // Chuyển đổi giá từ Decimal128 sang số thực và định dạng VND
+    // Tính toán số lượng sản phẩm bỏ qua dựa trên trang hiện tại và giới hạn sản phẩm mỗi trang
+    const skip = (page - 1) * limit;
+
+    // Tìm tất cả sản phẩm với giới hạn và bỏ qua (skip)
+    const products = await Product.find({})
+      .populate("category_id")
+      .skip(skip)
+      .limit(limit);
+
+    // Lấy tổng số sản phẩm để tính tổng số trang
+    const totalProducts = await Product.countDocuments();
+
+    // Tạo danh sách sản phẩm đã chuyển đổi định dạng giá
     const formattedProducts = products.map((product) => ({
-      ...product._doc, // Sao chép tất cả các thuộc tính của sản phẩm
-      price: parseFloat(product.price.toString()), // Chuyển đổi giá
+      ...product._doc,
+      price: parseFloat(product.price.toString()),
     }));
 
-    res.json({ products: formattedProducts }); // Trả về danh sách sản phẩm
+    // Trả về danh sách sản phẩm cùng với thông tin phân trang
+    res.json({
+      products: formattedProducts,
+      currentPage: page,
+      totalPages: Math.ceil(totalProducts / limit),
+      totalProducts: totalProducts,
+    });
   } catch (err) {
     console.error("Error retrieving all products:", err);
-    res.status(500).json({ error: "Error retrieving all products" }); // Phản hồi lỗi server
+    res.status(500).json({ error: "Error retrieving all products" });
   }
 });
+
 
 router.get("/products", async (req, res) => {
   const { category_id, limit = 10 } = req.query;

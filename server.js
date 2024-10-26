@@ -39,6 +39,7 @@ const corsOptions = {
     "http://localhost:8081",
     "http://localhost:8085",
     "http://26.122.98.186:8085",
+    "https://shoppets-eight.vercel.app",
   ],
   credentials: true,
 };
