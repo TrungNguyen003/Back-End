@@ -285,8 +285,8 @@ router.post("/checkout/stripe", isAuthenticated, async (req, res) => {
       })),
       mode: "payment",
       // Tổng số tiền bao gồm phí vận chuyển
-      success_url: `http://localhost:3000/success?orderId=${order._id}`,
-      cancel_url: `http://localhost:3000/cancel-payment?orderId=${order._id}`,
+      success_url: `https://shoppets-eight.vercel.app/success?orderId=${order._id}`,
+      cancel_url: `https://shoppets-eight.vercel.app/cancel-payment?orderId=${order._id}`,
       metadata: {
         userId: userId.toString(),
         cartId: cart._id.toString(),
@@ -524,7 +524,7 @@ router.post("/checkout/vnpay", isAuthenticated, async (req, res) => {
       }))
     );
 
-    const returnUrl = `http://localhost:3000/success?orderId=${order._id}`;
+    const returnUrl = `https://shoppets-eight.vercel.app/success?orderId=${order._id}`;
 
     // Xóa các sản phẩm đã chọn khỏi giỏ hàng sau khi thanh toán
     cart.items = cart.items.filter(
@@ -674,8 +674,8 @@ router.post("/process-payment", isAuthenticated, async (req, res) => {
         };
       }),
       mode: "payment",
-      success_url: `http://localhost:3000/success?orderId=${order._id}`,
-      cancel_url: "http://localhost:3000/cart",
+      success_url: `https://shoppets-eight.vercel.app/success?orderId=${order._id}`,
+      cancel_url: "https://shoppets-eight.vercel.app/cart",
       metadata: {
         orderId: order._id.toString(),
         userId: order.user.toString(),
@@ -856,8 +856,8 @@ router.post("/checkout/buynow/stripe", isAuthenticated, async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `http://localhost:3000/success?orderId=${order._id}`,
-      cancel_url: `http://localhost:3000/cancel-payment?orderId=${order._id}`,
+      success_url: `https://shoppets-eight.vercel.app/success?orderId=${order._id}`,
+      cancel_url: `https://shoppets-eight.vercel.app/cancel-payment?orderId=${order._id}`,
       metadata: {
         userId: userId.toString(),
         cartId: null,
@@ -973,7 +973,7 @@ router.post("/checkout/vnpay/now", isAuthenticated, async (req, res) => {
     const orderId = moment(date).format("DDHHmmss");
     const currCode = "VND";
 
-    const returnUrl = `http://localhost:3000/success?orderId=${order._id}`;
+    const returnUrl = `https://shoppets-eight.vercel.app/success?orderId=${order._id}`;
 
     // Remove selected product from cart after checkout
     // Remove the product from the cart
