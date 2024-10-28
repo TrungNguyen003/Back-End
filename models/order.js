@@ -69,6 +69,7 @@ const OrderSchema = new Schema(
       enum: [
         "chưa giải quyết",
         "trả trước",
+        "đã nhận thanh toán",
         "failed",
         "chưa thanh toán",
         "cod",

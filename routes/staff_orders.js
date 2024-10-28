@@ -228,6 +228,47 @@ router.put(
   }
 );
 
+router.put(
+  "/staff/orders/:orderId/payment",
+  isAuthenticated,
+  isSalesStaff,
+  async (req, res) => {
+    try {
+      const { paymentStatus } = req.body;
+      const orderId = req.params.orderId;
+
+      const updateData = { paymentStatus };
+
+      // Tìm đơn hàng và cập nhật paymentStatus
+      const order = await Order.findByIdAndUpdate(orderId, updateData, {
+        new: true,
+      });
+
+      if (!order) {
+        return res.status(404).json({ msg: "Order not found" });
+      }
+
+      // Thêm bản ghi tương tác mới vào interactions
+      const interaction = {
+        staff: req.user._id, // ID của nhân viên
+        action: `Cập nhật trạng thái thanh toán thành "${paymentStatus}"`, // Loại hành động
+        timestamp: new Date(), // Thời gian hành động
+      };
+
+      // Cập nhật interactions cho đơn hàng
+      order.interactions.push(interaction);
+      await order.save();
+
+      res.status(200).json(order);
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+      res.status(500).json({ msg: "Error updating payment status" });
+    }
+  }
+);
+
+
+
 router.delete(
   "/staff/orders/:orderId",
   isAuthenticated,

@@ -121,7 +121,7 @@ async function handleCheckoutSession(session) {
         items: [],
         total: total + shippingFee,
         status: "chưa giải quyết",
-        paymentStatus: "trả trước",
+        paymentStatus: "chưa giải quyết",
         email,
         address: formattedAddress,
         paymentIntentId: session.payment_intent,
@@ -130,7 +130,7 @@ async function handleCheckoutSession(session) {
       });
     } else {
       order.status = "chưa giải quyết";
-      order.paymentStatus = "trả trước";
+      order.paymentStatus = "chưa giải quyết";
       order.paymentIntentId = session.payment_intent;
       order.shippingFee = shippingFee;
       order.total = total + shippingFee;
