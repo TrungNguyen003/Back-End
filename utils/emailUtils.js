@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 
 // Hàm gửi email xác nhận và trả về verifyUrl
 const sendVerificationEmail = async (to, userId, token) => {
-  const verifyUrl = `http://localhost:10000/users/verify-email?token=${token}&userId=${userId}`;
+  const verifyUrl = `https://back-end-42ja.onrender.com/users/verify-email?token=${token}&userId=${userId}`;
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
