@@ -285,13 +285,11 @@ router.post(
         return res.redirect(`/admin/products/edit-product/${id}`);
       }
 
-      // Chuyển đổi giá sang VND
-      const exchangeRate = 24000; // Tỷ giá USD/VND
-      const priceInVND = (parseFloat(price) * exchangeRate).toFixed(2);
+
 
       product.name = name;
       product.description = description;
-      product.price = mongoose.Types.Decimal128.fromString(priceInVND);
+      product.price = mongoose.Types.Decimal128.fromString(parseFloat(price).toFixed(3));
       product.category_id = category_id;
       product.stock = stock;
       product.prices_by_weight = JSON.parse(prices_by_weight);
