@@ -161,6 +161,34 @@ router.post("/send-verification-email", async (req, res) => {
 });
 
 
+router.get('/verify-email', async (req, res) => {
+  const { token, userId } = req.query;
+
+  try {
+    const user = await User.findOne({
+      user_id: userId,
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() } // Kiểm tra thời gian hết hạn
+    });
+
+    if (!user) {
+      return res.status(400).json({ msg: 'Mã xác nhận không hợp lệ hoặc đã hết hạn.' });
+    }
+
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    user.isVerified = true;
+
+    await user.save();
+
+    res.status(200).json({ msg: 'Email đã được xác nhận thành công!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Lỗi máy chủ' });
+  }
+});
+
+
 
 
 router.get("/logout", (req, res) => {

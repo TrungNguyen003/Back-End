@@ -61,7 +61,7 @@ const generateStyledEmailHTML = (order, orderDetails, shippingFee) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #d9d9d9; padding: 20px; background-color: #ffffff;">
       <div style="text-align: center; padding: 10px 0;">
-        <h2 style="color: #333333; font-size: 24px;">Đơn Hàng #${order._id} Đã Giao Hàng Thành Công</h2>
+        <h2 style="color: #333333; font-size: 24px;">Đơn Hàng #${order._id} Đã Đặt </h2>
       </div>
 
       <div style="text-align: center; margin-bottom: 30px;">
@@ -70,7 +70,7 @@ const generateStyledEmailHTML = (order, orderDetails, shippingFee) => {
 
       <div style="margin-bottom: 30px;">
         <p>Xin Chào ${order.username},</p>
-        <p>Đơn Hàng #${order._id} của bạn đã được giao thành công ngày ${new Date(
+        <p>Đơn Hàng #${order._id} của bạn đã được đặt ngày ${new Date(
           order.createdAt
         ).toLocaleDateString("vi-VN")}.</p>
         <p>Vui lòng đăng nhập PetStore để xác nhận bạn đã nhận hàng và hài lòng với sản phẩm trong vòng 5 ngày.</p>
