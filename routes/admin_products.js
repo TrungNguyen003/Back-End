@@ -18,19 +18,30 @@ router.get("/", async (req, res) => {
       query.name = { $regex: name, $options: "i" }; // Tìm kiếm không phân biệt chữ hoa/chữ thường
     }
 
-    // Áp dụng bộ lọc category nếu có
-    if (category) {
-      query.category = { $regex: category, $options: "i" };
-    }
-
     // Áp dụng bộ lọc price nếu có
     if (price) {
       query.price = { $lte: Number(price) }; // Lọc theo giá nhỏ hơn hoặc bằng giá trị nhập
     }
 
+    // Áp dụng bộ lọc category nếu có
+    if (category) {
+      const categoryDoc = await Category.findOne({
+        Name: { $regex: category, $options: "i" },
+      });
+
+      // Nếu tìm thấy category, lấy ID của nó
+      if (categoryDoc) {
+        query.category_id = categoryDoc._id;
+      } else {
+        // Nếu không tìm thấy category, trả về mảng rỗng
+        return res.json({ products: [], count: 0 });
+      }
+    }
+
     const count = await Product.countDocuments(query);
     const products = await Product.find(query)
       .populate("category_id")
+      .sort({ createdAt: -1 }) // Sắp xếp giảm dần theo createdAt
       .skip((page - 1) * limit)
       .limit(Number(limit));
 
@@ -45,6 +56,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
+
 
 router.post(
   "/add-product",
@@ -117,7 +129,9 @@ router.post(
         category_id,
         name,
         description,
-        price: mongoose.Types.Decimal128.fromString(parseFloat(price).toFixed(3)), // Lưu trực tiếp giá VND
+        price: mongoose.Types.Decimal128.fromString(
+          parseFloat(price).toFixed(3)
+        ), // Lưu trực tiếp giá VND
         stock,
         prices_by_weight: processedPricesByWeight, // Thêm mảng giá theo cân nặng
         image: imageFile,
@@ -144,7 +158,6 @@ router.post(
     }
   }
 );
-
 
 router.get("/edit-product/:id", async (req, res) => {
   try {

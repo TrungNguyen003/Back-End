@@ -121,4 +121,32 @@ router.post(
   }
 );
 
+
+router.put('/:id/role', [
+  check("role", "Role is required").notEmpty(), // Validate that role is not empty
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() }); // Send validation errors if any
+  }
+
+  try {
+    const { role } = req.body; // Extract the new role from the request body
+    const user = await User.findById(req.params.id); // Find user by ID
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' }); // Handle case where user is not found
+    }
+
+    user.role = role; // Update the user's role
+    await user.save(); // Save changes to the database
+
+    res.json({ msg: 'Role updated successfully', user }); // Respond with success message and updated user
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' }); // Handle server errors
+  }
+});
+
+
 module.exports = router;
