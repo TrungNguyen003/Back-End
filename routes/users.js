@@ -408,5 +408,28 @@ router.post("/change-password", authenticateJWT, async (req, res) => {
 });
 
 
+router.post("/update-phone", authenticateJWT, async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ msg: "Phone number is required" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    user.phone = phone;
+    await user.save();
+
+    res.status(200).json({ phone: user.phone });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
 
 module.exports = router;
