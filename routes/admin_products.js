@@ -116,7 +116,7 @@ router.post(
             price: mongoose.Types.Decimal128.fromString(
               parseFloat(item.price).toFixed(3)
             ),
-          }));
+          }));z
         } catch (error) {
           return res
             .status(400)
