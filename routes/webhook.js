@@ -40,7 +40,10 @@ router.post(
       case "checkout.session.expired": // Sự kiện khi phiên hết hạn
       case "payment_intent.canceled": // Sự kiện khi thanh toán bị hủy
         const canceledSession = event.data.object;
-        console.log("Phiên thanh toán đã bị hủy hoặc hết hạn:", canceledSession);
+        console.log(
+          "Phiên thanh toán đã bị hủy hoặc hết hạn:",
+          canceledSession
+        );
         await handleCanceledSession(canceledSession);
         break;
       default:
@@ -56,15 +59,22 @@ async function handleCanceledSession(session) {
   const order = await Order.findOne({ stripeSessionId: stripeSessionId });
 
   if (order) {
-    console.log(`Đơn hàng ${order._id} đã bị hủy, xóa các sản phẩm từ giỏ hàng.`);
+    console.log(
+      `Đơn hàng ${order._id} đã bị hủy, xóa các sản phẩm từ giỏ hàng.`
+    );
     const selectedItems = session.metadata.selectedItems.split(",");
     await Cart.findOneAndUpdate(
       { user: order.user },
       { $pull: { items: { _id: { $in: selectedItems } } } }
     );
-    console.log("Đã xóa các sản phẩm được chọn từ giỏ hàng sau khi hủy đơn hàng.");
+    console.log(
+      "Đã xóa các sản phẩm được chọn từ giỏ hàng sau khi hủy đơn hàng."
+    );
   } else {
-    console.log("Không tìm thấy đơn hàng với stripeSessionId:", stripeSessionId);
+    console.log(
+      "Không tìm thấy đơn hàng với stripeSessionId:",
+      stripeSessionId
+    );
 
     // Xóa sản phẩm khỏi giỏ hàng ngay cả khi không có đơn hàng (trường hợp phiên bị hủy trước khi đơn hàng được tạo)
     const selectedItems = session.metadata.selectedItems.split(",");
@@ -72,7 +82,9 @@ async function handleCanceledSession(session) {
       { user: session.metadata.userId },
       { $pull: { items: { _id: { $in: selectedItems } } } }
     );
-    console.log("Đã xóa các sản phẩm được chọn từ giỏ hàng sau khi hủy phiên thanh toán.");
+    console.log(
+      "Đã xóa các sản phẩm được chọn từ giỏ hàng sau khi hủy phiên thanh toán."
+    );
   }
 }
 
@@ -101,7 +113,9 @@ async function handleCheckoutSession(session) {
       .join(", ");
 
     // Kiểm tra đơn hàng đã tồn tại với paymentIntentId
-    let order = await Order.findOne({ paymentIntentId: session.payment_intent });
+    let order = await Order.findOne({
+      paymentIntentId: session.payment_intent,
+    });
 
     if (order) {
       console.log("Đơn hàng đã được xử lý trước đó với ID:", order._id);
@@ -121,7 +135,7 @@ async function handleCheckoutSession(session) {
         items: [],
         total: total + shippingFee,
         status: "chưa giải quyết",
-        paymentStatus: "chưa giải quyết",
+        paymentStatus: "trả trước",
         email,
         address: formattedAddress,
         paymentIntentId: session.payment_intent,
@@ -130,7 +144,7 @@ async function handleCheckoutSession(session) {
       });
     } else {
       order.status = "chưa giải quyết";
-      order.paymentStatus = "chưa giải quyết";
+      order.paymentStatus = "trả trước";
       order.paymentIntentId = session.payment_intent;
       order.shippingFee = shippingFee;
       order.total = total + shippingFee;
@@ -143,11 +157,15 @@ async function handleCheckoutSession(session) {
     }
 
     const selectedItems = session.metadata.selectedItems.split(",");
-    const filteredItems = cart.items.filter(item => {
-      return selectedItems.includes(paymentMethod === "stripe" ? item._id.toString() : item.product._id.toString());
+    const filteredItems = cart.items.filter((item) => {
+      return selectedItems.includes(
+        paymentMethod === "stripe"
+          ? item._id.toString()
+          : item.product._id.toString()
+      );
     });
 
-    order.items = filteredItems.map(item => ({
+    order.items = filteredItems.map((item) => ({
       product: item.product._id,
       quantity: item.quantity,
       price: item.price,
@@ -157,8 +175,8 @@ async function handleCheckoutSession(session) {
 
     await order.save();
 
-     // Xóa các sản phẩm đã chọn khỏi giỏ hàng sau khi thanh toán thành công
-     await Cart.findOneAndUpdate(
+    // Xóa các sản phẩm đã chọn khỏi giỏ hàng sau khi thanh toán thành công
+    await Cart.findOneAndUpdate(
       { user: userId },
       { $pull: { items: { _id: { $in: selectedItems } } } }
     );
@@ -166,15 +184,16 @@ async function handleCheckoutSession(session) {
     console.log("Đã xóa các mặt hàng đã chọn từ giỏ hàng");
 
     // Tùy chọn: Gửi email hóa đơn cho khách hàng
-    const orderDetails = await OrderDetail.find({ order: order._id }).populate("product");
+    const orderDetails = await OrderDetail.find({ order: order._id }).populate(
+      "product"
+    );
     await sendInvoiceEmail(order.email, order, orderDetails);
-    
+
     return order._id;
   } catch (error) {
     console.error("Lỗi khi xử lý phiên thanh toán:", error);
   }
 }
-
 
 async function handleRefund(refund) {
   try {
